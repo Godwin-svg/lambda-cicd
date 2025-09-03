@@ -53,7 +53,7 @@ jobs:
           if [ -f lambda.zip ]; then
             echo "Deploying Lambda function..."
             aws lambda update-function-code \
-              --function-name my-test-cicd-lambda \
+              --function-name my-test-cicd-lambda\
               --zip-file fileb://lambda.zip
           else
             echo "No zip file found. Deployment skipped."
