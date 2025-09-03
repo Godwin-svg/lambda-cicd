@@ -1,10 +1,10 @@
-name: Deploy AWS Lambda
+name: Deploy AWS Lambda with AWS Profile
 
 on:
-  workflow_dispatch:  # allows manual trigger
   push:
     branches:
       - main
+  
 
 jobs:
   deploy-lambda:
@@ -15,7 +15,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Install dependencies (if any)
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      # Step 3: Install dependencies if requirements.txt exists
       - name: Install dependencies
         run: |
           cd lambda-cicd/lambda
@@ -26,29 +32,37 @@ jobs:
             echo "No dependencies to install"
           fi
 
-      # Step 3: Package Lambda function
+      # Step 4: Package Lambda function
       - name: Package Lambda function
         run: |
           cd lambda-cicd/lambda
           zip -r lambda.zip .
           mv lambda.zip ../../
+          cd ../..
 
-      # Step 4: Configure AWS credentials
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+      # Step 5: Configure AWS CLI profile
+      - name: Configure AWS CLI profile 'dev'
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} --profile dev
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --profile dev
+          aws configure set region us-east-1 --profile dev
 
-      # Step 5: Deploy to AWS Lambda
+      # Step 6: Debug - list files
+      - name: List files
+        run: |
+          echo "Files in lambda folder:"
+          ls -R lambda-cicd/lambda
+          echo "Check lambda.zip at root:"
+          ls -l lambda.zip
+
+      # Step 7: Deploy to AWS Lambda using 'dev' profile
       - name: Deploy to AWS Lambda
         run: |
           if [ -f lambda.zip ]; then
-            echo "Deploying Lambda function..."
+            echo "Deploying Lambda function using profile 'dev'..."
             aws lambda update-function-code \
               --function-name my-test-cicd-lambda \
-              --zip-file fileb://lambda.zip
+              --zip-file fileb://lambda.zip \
+              --profile dev
           else
             echo "No zip file found. Deployment skipped."
-          fi
