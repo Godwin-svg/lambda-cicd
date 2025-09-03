@@ -8,10 +8,10 @@ on:
 
 jobs:
   deploy-lambda:
-    runs-on: ubuntu latest                # Use GitHub's ubuntu latest runner
+    runs-on: ubuntu-latest                # Use GitHub's ubuntu latest runner
     steps:
       - name: checkout repository
-        uses: action/checkout@v4          # Get your repo code so the runner can access file like lambda/
+        uses: actions/checkout@v4          # Get your repo code so the runner can access file like lambda/
 
       - name: set up python
         uses: actions/setup-python@v4
@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run:  |
           cd lambda
-          pip install -r requirement.txt -t .
+          pip install -r requirements.txt -t .
         # Gose into lambda folder
         # Installs python packages from requirements.txt into the same folder
         # Ensure dependencies are packaged with lambda code
@@ -29,7 +29,7 @@ jobs:
       - name: Package lamdda function
         run:  |
           cd lambda
-          zip -r lambda.zip .
+          zip -r ../lambda.zip .
           # Zips everything in the lambda folder (.)
 
         # Zips everything in the lambda folder (.)
@@ -49,7 +49,7 @@ jobs:
         run:  |
           aws lambda update-function-code \
             --function-name my-test-cicd-lambda \
-            --zip-file file://lambda.zip
+            --zip-file fileb://lambda.zip
         # Uses AWS CLI to upload the zip file to your Lambda function
 
 
