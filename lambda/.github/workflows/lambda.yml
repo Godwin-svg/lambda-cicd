@@ -3,8 +3,7 @@ on:
   push:                                   # Run this workflow when is pushed
     branches:
       - main                              # only if push is on the "main" branch
-    paths:
-      - 'lambda/'                         # only if files inside the "lambda" folder are changed
+                          # only if files inside the "lambda" folder are changed
 
 jobs:
   deploy-lambda:
