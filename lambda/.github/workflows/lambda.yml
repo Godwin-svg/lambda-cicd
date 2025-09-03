@@ -49,7 +49,7 @@ jobs:
         run:  |
           aws lambda update-function-code \
             --function-name my-test-cicd-lambda \
-            --zip-file fileb://lambda.zip
+            --zip-file file://lambda.zip
         # Uses AWS CLI to upload the zip file to your Lambda function
 
 
