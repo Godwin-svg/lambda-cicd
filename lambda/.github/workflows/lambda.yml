@@ -4,7 +4,7 @@ on:
     branches:
       - main                              # only if push is on the "main" branch
     paths:
-      - 'lambda/**'                         # only if files inside the "lambda" folder are changed
+      - 'lambda/'                         # only if files inside the "lambda" folder are changed
 
 jobs:
   deploy-lambda:
