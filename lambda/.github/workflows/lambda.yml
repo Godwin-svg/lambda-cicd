@@ -1,25 +1,21 @@
 name: Deploy AWS Lambda
 
 on:
+  workflow_dispatch:  # allows manual trigger
   push:
     branches:
       - main
+
 jobs:
   deploy-lambda:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.13'
-
-      # Step 3: Install dependencies if requirements.txt exists
+      # Step 2: Install dependencies (if any)
       - name: Install dependencies
         run: |
           cd lambda-cicd/lambda
@@ -30,15 +26,14 @@ jobs:
             echo "No dependencies to install"
           fi
 
-      # Step 4: Package Lambda function
+      # Step 3: Package Lambda function
       - name: Package Lambda function
         run: |
           cd lambda-cicd/lambda
           zip -r lambda.zip .
           mv lambda.zip ../../
-          cd ../..
 
-      # Step 5: Configure AWS credentials
+      # Step 4: Configure AWS credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -46,13 +41,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # Step 6: Deploy to AWS Lambda
+      # Step 5: Deploy to AWS Lambda
       - name: Deploy to AWS Lambda
         run: |
           if [ -f lambda.zip ]; then
             echo "Deploying Lambda function..."
             aws lambda update-function-code \
-              --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+              --function-name my-test-cicd-lambda \
               --zip-file fileb://lambda.zip
           else
             echo "No zip file found. Deployment skipped."
