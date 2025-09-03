@@ -1,40 +1,35 @@
-name: Deploy AWS Lambda                   # workflow name
-on:                                       
-  push:                                   # Run this workflow when is pushed
+name: Deploy AWS Lambda
+
+on:
+  push:
     branches:
-      - main                              # only if push is on the "main" branch
+      - main
     paths:
-      - 'lambda/**'                         # only if files inside the "lambda" folder are changed
+      - 'lambda-cicd/lambda/**'
+  
 
 jobs:
   deploy-lambda:
-    runs-on: ubuntu-latest                # Use GitHub's ubuntu latest runner
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v4          # Get your repo code so the runner can access file like lambda/
+    runs-on: ubuntu-latest
 
-      - name: set up python
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.13'         # Installs python 3.13 (needed if lambda uses python + dependencies)
+          python-version: '3.13'
 
       - name: Install dependencies
-        run:  |
-          cd lambda
+        run: |
+          cd lambda-cicd/lambda
           pip install -r requirements.txt -t .
-        # Gose into lambda folder
-        # Installs python packages from requirements.txt into the same folder
-        # Ensure dependencies are packaged with lambda code
 
-      - name: Package lamdda function
-        run:  |
-          cd lambda
-          zip -r ../lambda.zip .
-          # Zips everything in the lambda folder (.)
-
-        # Zips everything in the lambda folder (.)
-        # Saves the zip one level up (../) so it’s not zipped into itself
-        # Output file: lambda.zip (ready to upload to AWS)
+      - name: Package lambda function
+        run: |
+          cd lambda-cicd/lambda
+          zip -r ../../lambda.zip .
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -42,20 +37,9 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-        # Authenticates to AWS using GitHub Secrets
-        # Lets later AWS CLI commands know "who you are" and "where to deploy"
 
-      - name: Deploy to AWS Lamda
-        run:  |
+      - name: Deploy to AWS Lambda
+        run: |
           aws lambda update-function-code \
             --function-name my-test-cicd-lambda \
             --zip-file fileb://lambda.zip
-        # Uses AWS CLI to upload the zip file to your Lambda function
-
-
-
-
-
-        
-
-
